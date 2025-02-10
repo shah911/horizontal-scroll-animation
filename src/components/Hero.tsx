@@ -2,7 +2,13 @@
 
 import { useRef } from "react";
 import Section from "./Section";
-import { motion, useScroll, useTransform } from "motion/react";
+import {
+  motion,
+  useAnimationFrame,
+  useMotionValue,
+  useScroll,
+  useTransform,
+} from "motion/react";
 
 const data = [
   {
@@ -38,8 +44,18 @@ export default function Hero() {
     target: ref,
   });
 
-  const x = useTransform(scrollYProgress, [0, 1], ["75%", "-75%"]);
-  const y = useTransform(scrollYProgress, [0, 1], ["25%", "-100%"]);
+  const lerp = (start: number, end: number, alpha: number) => {
+    return start + (end - start) * alpha;
+  };
+
+  const lerpedScroll = useMotionValue(0);
+
+  useAnimationFrame(() => {
+    lerpedScroll.set(lerp(lerpedScroll.get(), scrollYProgress.get(), 0.06));
+  });
+
+  const x = useTransform(lerpedScroll, [0, 1], ["75%", "-75%"]);
+  const y = useTransform(lerpedScroll, [0, 1], ["25%", "-100%"]);
 
   return (
     <div ref={ref} className="h-[500vh]">
